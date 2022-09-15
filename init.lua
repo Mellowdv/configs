@@ -16,6 +16,10 @@ Plug 'L3MON4D3/LuaSnip'
 Plug 'kyazdani42/nvim-web-devicons'
 Plug "mfussenegger/nvim-jdtls"
 Plug "p00f/clangd_extensions.nvim"
+Plug 'junegunn/fzf.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'kyazdani42/nvim-web-devicons'
+Plug 'akinsho/bufferline.nvim'
 
 vim.call('plug#end')
 
@@ -76,7 +80,13 @@ local lsp_flags = {
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
-require("clangd_extensions").setup()
+require("clangd_extensions").setup {
+	server = {
+		on_attach = on_attach,
+		flags = lsp_flags,
+		capabilities = capabilities,
+	}
+}
 
 ---require('lspconfig')['clangd'].setup {
 ---	on_attach = on_attach,
