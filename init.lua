@@ -1,30 +1,22 @@
-local Plug = vim.fn['plug#']
+require('plugins')
+local vim = vim
 
-vim.call('plug#begin', '~/.config/nvim/plug')
+-- telescope fuzzy extension and commands
 
-Plug 'srcery-colors/srcery-vim'
-Plug 'itchyny/lightline.vim'
-Plug('nvim-treesitter/nvim-treesitter', { ['do'] = 'TSUpdate' })
-Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim'
-Plug 'neovim/nvim-lspconfig'
-Plug 'williamboman/nvim-lsp-installer'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'saadparwaiz1/cmp_luasnip'
-Plug 'L3MON4D3/LuaSnip'
-Plug 'kyazdani42/nvim-web-devicons'
-Plug "mfussenegger/nvim-jdtls"
-Plug "p00f/clangd_extensions.nvim"
-Plug 'junegunn/fzf.vim'
-Plug 'scrooloose/nerdtree'
-Plug 'kyazdani42/nvim-web-devicons'
-Plug 'akinsho/bufferline.nvim'
+require('telescope').load_extension('fzf')
 
-vim.call('plug#end')
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', 'ff', builtin.find_files, {})
+vim.keymap.set('n', 'fg', builtin.live_grep, {})
+vim.keymap.set('n', 'fb', builtin.buffers, {})
+vim.keymap.set('n', 'fh', builtin.help_tags, {})
+vim.keymap.set('n', '<space>lds', builtin.lsp_document_symbols, {})
 
-require("nvim-lsp-installer").setup({
+require("mason").setup({
 	automatic_installation = true
+})
+require("mason-lspconfig").setup({
+    ensure_installed = { 'sumneko_lua', 'pylsp', 'jdtls', 'rust_analyzer', 'hls'}
 })
 
 require 'nvim-treesitter.configs'.setup {
@@ -37,9 +29,11 @@ require 'nvim-treesitter.configs'.setup {
 	},
 }
 
-vim.opt.number = true
 vim.opt.termguicolors = true
-vim.opt.tabstop = 4
+require('nvim-web-devicons').setup {
+    override = {},
+    default = true
+}
 
 -- lsp config
 
@@ -73,12 +67,14 @@ local on_attach = function(client, bufnr)
 	vim.keymap.set('n', '<space>f', vim.lsp.buf.formatting, bufopts)
 end
 
+
 local lsp_flags = {
 	debounce_text_changes = 150,
 }
 
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+-- lsp servers config
 
 require("clangd_extensions").setup {
 	server = {
@@ -87,12 +83,6 @@ require("clangd_extensions").setup {
 		capabilities = capabilities,
 	}
 }
-
----require('lspconfig')['clangd'].setup {
----	on_attach = on_attach,
----	flags = lsp_flags,
----	capabilities = capabilities,
----}
 require('lspconfig')['sumneko_lua'].setup {
 	on_attach = on_attach,
 	flags = lsp_flags,
@@ -114,6 +104,11 @@ require('lspconfig')['hls'].setup {
 	capabilities = capabilities,
 }
 require('lspconfig')['rust_analyzer'].setup {
+	on_attach = on_attach,
+	flags = lsp_flags,
+	capabilities = capabilities,
+}
+require('lspconfig')['asm_lsp'].setup {
 	on_attach = on_attach,
 	flags = lsp_flags,
 	capabilities = capabilities,
@@ -163,12 +158,52 @@ cmp.setup {
 	},
 }
 
+-- colorscheme
 vim.cmd [[
 	colorscheme srcery
-	let g:lightline = { 
-		\ 'colorscheme': 'srcery', 
-		\ }
 ]]
 
+-- lualine config
+require("lualine").setup {
+    options = {
+        icons_enabled = true,
+        theme = 'codedark',
+    }
+}
+
+-- bufferline config
+local bufferline = require("bufferline")
+bufferline.setup{
+    options = {
+        mode = 'buffers',
+        numbers = 'ordinal',
+        color_icons = true,
+    },
+    highlights = {
+        buffer_selected = {
+            italic = false
+        }
+    }
+}
+
+-- bufferline bindings for jumping to buffers
+vim.keymap.set('n', '<Space>1', ':BufferLineGoToBuffer 1<CR>', { silent = true })
+vim.keymap.set('n', '<Space>2', ':BufferLineGoToBuffer 2<CR>', { silent = true })
+vim.keymap.set('n', '<Space>3', ':BufferLineGoToBuffer 3<CR>', { silent = true })
+vim.keymap.set('n', '<Space>4', ':BufferLineGoToBuffer 4<CR>', { silent = true })
+vim.keymap.set('n', '<Space>5', ':BufferLineGoToBuffer 5<CR>', { silent = true })
+vim.keymap.set('n', '<Space>6', ':BufferLineGoToBuffer 6<CR>', { silent = true })
+vim.keymap.set('n', '<Space>7', ':BufferLineGoToBuffer 7<CR>', { silent = true })
+vim.keymap.set('n', '<Space>8', ':BufferLineGoToBuffer 8<CR>', { silent = true })
+vim.keymap.set('n', '<Space>9', ':BufferLineGoToBuffer 9<CR>', { silent = true })
+vim.keymap.set('n', '<Space>$', ':BufferLineGoToBuffer -1<CR>', { silent = true })
+
+
+-- general Vim options
+vim.opt.ignorecase=true
+vim.opt.smartcase=true
+vim.opt.relativenumber=true
+vim.opt.number=true
+vim.opt.expandtab=true
+vim.opt.tabstop=4
 vim.opt.shiftwidth=4
-vim.opt.softtabstop=4
